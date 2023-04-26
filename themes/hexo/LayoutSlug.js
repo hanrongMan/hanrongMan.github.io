@@ -11,6 +11,7 @@ import ArticleAdjacent from './components/ArticleAdjacent'
 import ArticleCopyright from './components/ArticleCopyright'
 import ArticleRecommend from './components/ArticleRecommend'
 import { isBrowser } from '@/lib/utils'
+import ShareBar from '@/components/ShareBar'
 
 export const LayoutSlug = props => {
   const { post, lock, validPassword } = props
@@ -75,6 +76,9 @@ export const LayoutSlug = props => {
           </article>
 
           <div className='pt-4 border-dashed'></div>
+
+          {/* 分享 */}
+          <ShareBar post={post} />
 
           {/* 评论互动 */}
           <div className="duration-200 overflow-x-auto bg-white dark:bg-hexo-black-gray px-3">
