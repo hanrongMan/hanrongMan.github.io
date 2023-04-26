@@ -15,11 +15,6 @@
   </a>
 </p>
 
-
-中文README | [README in English](./README_EN.md)
-
-<hr/>
-
 一个使用 NextJS + Notion API 实现的，部署在 Vercel 上的静态博客系统。为Notion和所有创作者设计。
 
 
@@ -162,8 +157,9 @@
   </td>
 
   <td align="center">
-    <a href="https://github.com/emengweb" style="display:inline-block;width:80px"><img src="https://avatars.githubusercontent.com/u/31469739" width="64px;"  alt="emengweb"/><br/><sub><b>emengweb</b></sub></a><br/><a href="https://github.com/tangly1024/NotionNext/commits?author=emengweb" title="emengweb" >🔧 🐛</a>
+    <a href="https://github.com/RedhairHambagu" style="display:inline-block;width:80px"><img src="https://avatars.githubusercontent.com/u/129669334" width="64px;"  alt="RedhairHambagu"/><br/><sub><b>RedhairHambagu</b></sub></a><br/><a href="https://github.com/tangly1024/NotionNext/commits?author=RedhairHambagu" title="RedhairHambagu" >🔧 🐛</a>
   </td>
+
 </tr>
 </table>
 
