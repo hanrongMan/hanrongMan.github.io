@@ -176,6 +176,10 @@
   <a href="https://github.com/zdf1230" style="display:inline-block;width:80px"><img src="https://avatars.githubusercontent.com/u/5999425" width="64px;"  alt="zdf1230"/><br/><sub><b>zdf</b></sub></a><br/><a href="https://github.com/tangly1024/NotionNext/commits?author=zdf1230" title="zdf1230" >🔧 🐛</a>
   </td>
 
+  <td align="center">
+    <a href="https://github.com/kitety" style="display:inline-block;width:80px"><img src="https://avatars.githubusercontent.com/u/22906933" width="64px;"  alt="kitety"/><br/><sub><b>kitety</b></sub></a><br/><a href="https://github.com/tangly1024/NotionNext/commits?author=kitety" title="kitety" >🔧 🐛</a>
+  </td>
+
 
 </tr>
 </table>
