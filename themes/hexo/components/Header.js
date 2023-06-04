@@ -4,6 +4,8 @@ import Typed from 'typed.js'
 import CONFIG_HEXO from '../config_hexo'
 import NavButtonGroup from './NavButtonGroup'
 import throttle from 'lodash.throttle'
+import { useGlobal } from '@/lib/global'
+import BLOG from '@/blog.config'
 
 let wrapperTop = 0
 let windowTop = 0
@@ -17,13 +19,14 @@ const enableAutoScroll = false // 是否开启自动吸附滚动
 const Header = props => {
   const [typed, changeType] = useState()
   const { siteInfo } = props
+  const { locale } = useGlobal()
   useEffect(() => {
     updateHeaderHeight()
 
     if (!typed && window && document.getElementById('typed')) {
       changeType(
         new Typed('#typed', {
-          strings: CONFIG_HEXO.HOME_BANNER_GREETINGS,
+          strings: BLOG.GREETING_WORDS.split(','),
           typeSpeed: 200,
           backSpeed: 100,
           backDelay: 400,
@@ -103,7 +106,7 @@ const Header = props => {
                 onClick={() => { window.scrollTo({ top: wrapperTop, behavior: 'smooth' }) }}
                 className="cursor-pointer w-full text-center py-4 text-3xl absolute bottom-10 text-white"
             >
-                <div class="opacity-70 animate-bounce text-xs">点此继续</div>
+                <div className="opacity-70 animate-bounce text-xs">{locale.COMMON.START_READING}</div>
                 <i className='opacity-70 animate-bounce fas fa-angle-down' />
             </div>
         </header>
