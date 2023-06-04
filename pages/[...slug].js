@@ -2,45 +2,35 @@ import BLOG from '@/blog.config'
 import { getPostBlocks } from '@/lib/notion'
 import { getGlobalNotionData } from '@/lib/notion/getNotionData'
 import { useGlobal } from '@/lib/global'
+import * as ThemeMap from '@/themes'
 import { useEffect, useState } from 'react'
 import { idToUuid } from 'notion-utils'
-import { useRouter } from 'next/router'
-import { isBrowser, memorize } from '@/lib/utils'
+import Router, { useRouter } from 'next/router'
 import { getNotion } from '@/lib/notion/getNotion'
 import { getPageTableOfContents } from '@/lib/notion/getPageTableOfContents'
 import md5 from 'js-md5'
-import dynamic from 'next/dynamic'
-import Loading from '@/components/Loading'
+import { isBrowser } from '@/lib/utils'
 
 /**
  * 根据notion的slug访问页面
  * @param {*} props
  * @returns
  */
-const Slug = memorize(props => {
-  const { theme, setOnLoading } = useGlobal()
+const Slug = props => {
+  const { theme, changeLoadingState } = useGlobal()
+  const ThemeComponents = ThemeMap[theme]
   const { post, siteInfo } = props
   const router = useRouter()
 
   // 文章锁🔐
   const [lock, setLock] = useState(post?.password && post?.password !== '')
-  const LayoutSlug = dynamic(() => import(`@/themes/${theme}`).then(async (m) => { return m.LayoutSlug }), { ssr: true, loading: () => <Loading /> })
-
-  /**
-     * 验证文章密码
-     * @param {*} result
-     */
-  const validPassword = passInput => {
-    const encrypt = md5(post.slug + passInput)
-    if (passInput && encrypt === post.password) {
-      setLock(false)
-      return true
-    }
-    return false
-  }
 
   useEffect(() => {
-    setOnLoading(false)
+    if (post) {
+      changeLoadingState(false)
+    } else {
+      changeLoadingState(true)
+    }
     if (post?.password && post?.password !== '') {
       setLock(true)
     } else {
@@ -48,17 +38,15 @@ const Slug = memorize(props => {
         post.content = Object.keys(post.blockMap.block).filter(key => post.blockMap.block[key]?.value?.parent_id === post.id)
         post.toc = getPageTableOfContents(post, post.blockMap)
       }
+
       setLock(false)
     }
-    router.events.on('routeChangeComplete', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    })
   }, [post])
 
   if (!post) {
     setTimeout(() => {
       if (isBrowser()) {
-        const article = document.getElementById('container')
+        const article = document.getElementById('notion-article')
         if (!article) {
           router.push('/404').then(() => {
             console.warn('找不到页面', router.asPath)
@@ -67,8 +55,21 @@ const Slug = memorize(props => {
       }
     }, 8 * 1000) // 404时长 8秒
     const meta = { title: `${props?.siteInfo?.title || BLOG.TITLE} | loading`, image: siteInfo?.pageCover || BLOG.HOME_BANNER_IMAGE }
+    return <ThemeComponents.LayoutSlug {...props} showArticleInfo={true} meta={meta} />
+  }
 
-    return <LayoutSlug {...props} showArticleInfo={true} meta={meta} />
+  /**
+   * 验证文章密码
+   * @param {*} result
+   */
+  const validPassword = passInput => {
+    const encrypt = md5(post.slug + passInput)
+
+    if (passInput && encrypt === post.password) {
+      setLock(false)
+      return true
+    }
+    return false
   }
 
   props = { ...props, lock, setLock, validPassword }
@@ -83,10 +84,14 @@ const Slug = memorize(props => {
     tags: post?.tags
   }
 
+  Router.events.on('routeChangeComplete', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  })
+
   return (
-      <LayoutSlug {...props} showArticleInfo={true} meta={meta} />
+    <ThemeComponents.LayoutSlug {...props} showArticleInfo={true} meta={meta} />
   )
-})
+}
 
 export async function getStaticPaths() {
   if (!BLOG.isProd) {
