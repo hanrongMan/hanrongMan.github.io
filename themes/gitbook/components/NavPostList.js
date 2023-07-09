@@ -29,7 +29,7 @@ const NavPostList = (props) => {
   })
 
   // 如果都没有选中默认打开第一个
-  if (!selectedSth && filteredPostGroups && filteredPostGroups.length > 0) {
+  if (!selectedSth && filteredPostGroups && filteredPostGroups?.length > 0) {
     filteredPostGroups[0].selected = true
   }
 
