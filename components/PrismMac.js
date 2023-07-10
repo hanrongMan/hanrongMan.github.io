@@ -22,10 +22,31 @@ const PrismMac = () => {
   const router = useRouter()
   useEffect(() => {
     const handleDarkModeChange = () => {
-      // 加载prism样式
-      loadPrismThemeCSS()
       if (JSON.parse(BLOG.CODE_MAC_BAR)) {
         loadExternalResource('/css/prism-mac-style.css', 'css')
+      }
+      let PRISM_THEME
+      let PRISM_PREVIOUS
+      const themeClass = document.documentElement.className
+      if (BLOG.PRISM_THEME_SWITCH) {
+        if (themeClass === 'dark') {
+          PRISM_THEME = BLOG.PRISM_THEME_DARK_PATH
+          PRISM_PREVIOUS = BLOG.PRISM_THEME_LIGHT_PATH
+          const previousTheme = document.querySelector(`link[href="${PRISM_PREVIOUS}"]`)
+          if (previousTheme) {
+            previousTheme.parentNode.removeChild(previousTheme)
+          }
+        } else {
+          PRISM_THEME = BLOG.PRISM_THEME_LIGHT_PATH
+          PRISM_PREVIOUS = BLOG.PRISM_THEME_DARK_PATH
+          const previousTheme = document.querySelector(`link[href="${PRISM_PREVIOUS}"]`)
+          if (previousTheme) {
+            previousTheme.parentNode.removeChild(previousTheme)
+          }
+        }
+        loadExternalResource(PRISM_THEME, 'css')
+      } else {
+        loadExternalResource(BLOG.PRISM_THEME_PREFIX_PATH, 'css')
       }
       loadExternalResource(BLOG.PRISM_JS_AUTO_LOADER, 'js').then((url) => {
         if (window?.Prism?.plugins?.autoloader) {
@@ -51,35 +72,6 @@ const PrismMac = () => {
     }
   }, [router])
   return <></>
-}
-
-/**
- * 加载样式
- */
-const loadPrismThemeCSS = () => {
-  let PRISM_THEME
-  let PRISM_PREVIOUS
-  const themeClass = document.documentElement.className
-  if (JSON.parse(BLOG.PRISM_THEME_SWITCH)) {
-    if (themeClass === 'dark') {
-      PRISM_THEME = BLOG.PRISM_THEME_DARK_PATH
-      PRISM_PREVIOUS = BLOG.PRISM_THEME_LIGHT_PATH
-      const previousTheme = document.querySelector(`link[href="${PRISM_PREVIOUS}"]`)
-      if (previousTheme) {
-        previousTheme.parentNode.removeChild(previousTheme)
-      }
-    } else {
-      PRISM_THEME = BLOG.PRISM_THEME_LIGHT_PATH
-      PRISM_PREVIOUS = BLOG.PRISM_THEME_DARK_PATH
-      const previousTheme = document.querySelector(`link[href="${PRISM_PREVIOUS}"]`)
-      if (previousTheme) {
-        previousTheme.parentNode.removeChild(previousTheme)
-      }
-    }
-    loadExternalResource(PRISM_THEME, 'css')
-  } else {
-    loadExternalResource(BLOG.PRISM_THEME_PREFIX_PATH, 'css')
-  }
 }
 
 /**
