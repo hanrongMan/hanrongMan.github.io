@@ -1,82 +1,17 @@
 import BLOG from '@/blog.config'
 import { getPostBlocks } from '@/lib/notion'
 import { getGlobalData } from '@/lib/notion/getNotionData'
-import { useEffect, useState } from 'react'
 import { idToUuid } from 'notion-utils'
-import { useRouter } from 'next/router'
 import { getNotion } from '@/lib/notion/getNotion'
-import { getPageTableOfContents } from '@/lib/notion/getPageTableOfContents'
-import { getLayoutByTheme } from '@/themes/theme'
-import md5 from 'js-md5'
-import { isBrowser } from '@/lib/utils'
-import { uploadDataToAlgolia } from '@/lib/algolia'
+import Slug from '.'
 
 /**
  * 根据notion的slug访问页面
  * @param {*} props
  * @returns
  */
-const Slug = props => {
-  const { post, siteInfo } = props
-  const router = useRouter()
-
-  // 文章锁🔐
-  const [lock, setLock] = useState(post?.password && post?.password !== '')
-
-  /**
-   * 验证文章密码
-   * @param {*} result
-  */
-  const validPassword = passInput => {
-    const encrypt = md5(post.slug + passInput)
-    if (passInput && encrypt === post.password) {
-      setLock(false)
-      return true
-    }
-    return false
-  }
-
-  // 文章加载
-  useEffect(() => {
-    // 404
-    if (!post) {
-      setTimeout(() => {
-        if (isBrowser()) {
-          const article = document.getElementById('notion-article')
-          if (!article) {
-            router.push('/404').then(() => {
-              console.warn('找不到页面', router.asPath)
-            })
-          }
-        }
-      }, 8 * 1000) // 404时长 8秒
-    }
-
-    // 文章加密
-    if (post?.password && post?.password !== '') {
-      setLock(true)
-    } else {
-      setLock(false)
-      if (!lock && post?.blockMap?.block) {
-        post.content = Object.keys(post.blockMap.block).filter(key => post.blockMap.block[key]?.value?.parent_id === post.id)
-        post.toc = getPageTableOfContents(post, post.blockMap)
-      }
-    }
-  }, [post])
-
-  const meta = {
-    title: post ? `${post?.title} | ${siteInfo?.title}` : `${props?.siteInfo?.title || BLOG.TITLE} | loading`,
-    description: post?.summary,
-    type: post?.type,
-    slug: post?.slug,
-    image: post?.pageCoverThumbnail || (siteInfo?.pageCover || BLOG.HOME_BANNER_IMAGE),
-    category: post?.category?.[0],
-    tags: post?.tags
-  }
-  props = { ...props, lock, meta, setLock, validPassword }
-  // 根据页面路径加载不同Layout文件
-  const Layout = getLayoutByTheme(useRouter())
-  return <Layout {...props} />
+const PrefixSlug = props => {
+  return <Slug {...props}/>
 }
 
 export async function getStaticPaths() {
@@ -90,13 +25,13 @@ export async function getStaticPaths() {
   const from = 'slug-paths'
   const { allPages } = await getGlobalData({ from })
   return {
-    paths: allPages?.map(row => ({ params: { slug: [row.slug] } })),
+    paths: allPages?.filter(row => row.slug.indexOf('/') > 0).map(row => ({ params: { prefix: row.slug.split('/')[0], slug: row.slug.split('/')[1] } })),
     fallback: true
   }
 }
 
-export async function getStaticProps({ params: { slug } }) {
-  let fullSlug = slug.join('/')
+export async function getStaticProps({ params: { prefix, slug } }) {
+  let fullSlug = prefix + '/' + slug
   if (JSON.parse(BLOG.PSEUDO_STATIC)) {
     if (!fullSlug.endsWith('.html')) {
       fullSlug += '.html'
@@ -127,10 +62,6 @@ export async function getStaticProps({ params: { slug } }) {
   // 文章内容加载
   if (!props?.posts?.blockMap) {
     props.post.blockMap = await getPostBlocks(props.post.id, from)
-  }
-
-  if (BLOG.ALGOLIA_APP_ID && BLOG.ALGOLIA_APP_KEY) {
-    uploadDataToAlgolia(props?.post)
   }
 
   // 推荐关联文章处理
@@ -188,4 +119,4 @@ function getRecommendPost(post, allPosts, count = 6) {
   return recommendPosts
 }
 
-export default Slug
+export default PrefixSlug
