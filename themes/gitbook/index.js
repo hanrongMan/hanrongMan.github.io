@@ -48,16 +48,16 @@ const LayoutBase = (props) => {
   const router = useRouter()
   const [tocVisible, changeTocVisible] = useState(false)
   const [pageNavVisible, changePageNavVisible] = useState(false)
-  const [filteredPosts, setFilteredPosts] = useState(allNavPages)
+  const [filteredPostGroups, setFilteredPostGroups] = useState(allNavPages)
 
   const showTocButton = post?.toc?.length > 1
 
   useEffect(() => {
-    setFilteredPosts(allNavPages)
+    setFilteredPostGroups(allNavPages)
   }, [post])
 
   return (
-        <ThemeGlobalGitbook.Provider value={{ tocVisible, changeTocVisible, filteredPosts, setFilteredPosts, allNavPages, pageNavVisible, changePageNavVisible }}>
+        <ThemeGlobalGitbook.Provider value={{ tocVisible, changeTocVisible, filteredPostGroups, setFilteredPostGroups, allNavPages, pageNavVisible, changePageNavVisible }}>
             <CommonHead meta={meta} />
             <Style/>
 
@@ -72,8 +72,10 @@ const LayoutBase = (props) => {
                         <div className='w-72 py-14 px-6 sticky top-0 overflow-y-scroll h-screen scroll-hidden'>
                             {slotLeft}
                             <SearchInput className='my-3 rounded-md' />
-                            {/* 所有文章列表 */}
-                            <NavPostList filteredPosts={filteredPosts} />
+                            <div className='mb-20'>
+                                {/* 所有文章列表 */}
+                                <NavPostList filteredPostGroups={filteredPostGroups} />
+                            </div>
 
                         </div>
 
@@ -146,7 +148,7 @@ const LayoutBase = (props) => {
                 </div>}
 
                 {/* 移动端导航抽屉 */}
-                <PageNavDrawer {...props} filteredPosts={filteredPosts} />
+                <PageNavDrawer {...props} filteredPostGroups={filteredPostGroups} />
 
                 {/* 移动端底部导航栏 */}
                 {/* <BottomMenuBar {...props} className='block md:hidden' /> */}
