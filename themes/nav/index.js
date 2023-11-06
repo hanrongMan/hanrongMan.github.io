@@ -11,7 +11,6 @@ import { useEffect, useState, createContext, useContext } from 'react'
 import Footer from './components/Footer'
 import TopNavBar from './components/TopNavBar'
 import { useGlobal } from '@/lib/global'
-import BLOG from '@/blog.config'
 import Announcement from './components/Announcement'
 import PageNavDrawer from './components/PageNavDrawer'
 import FloatTocButton from './components/FloatTocButton'
@@ -33,8 +32,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 
 import { MenuItem } from './components/MenuItem'
-import LogoBar from './components/LogoBar'
-
+import { siteConfig } from '@/lib/config'
 const WWAds = dynamic(() => import('@/components/WWAds'), { ssr: false })
 
 // 主题全局变量
@@ -77,21 +75,18 @@ const LayoutBase = (props) => {
             <Style/>
 
             {/* 主题样式根基 */}
-            <div id='theme-onenav' className='dark:bg-hexo-black-gray w-full h-screen min-h-screen justify-center dark:text-gray-300'>
+            <div id='theme-onenav' className=' dark:bg-hexo-black-gray w-full h-screen min-h-screen justify-center dark:text-gray-300'>
 
                 {/* 端顶部导航栏 */}
                 <TopNavBar {...props} />
 
                 {/* 左右布局区块 */}
-                <main id='wrapper' className={(BLOG.LAYOUT_SIDEBAR_REVERSE ? 'flex-row-reverse' : '') + ' relative flex justify-between w-full h-screen mx-auto'}>
+                <main id='wrapper' className={(JSON.parse(siteConfig('LAYOUT_SIDEBAR_REVERSE')) ? 'flex-row-reverse' : '') + ' relative flex justify-between w-full h-screen mx-auto'}>
 
                     {/* 左侧推拉抽屉 */}
                     <div className={'font-sans hidden md:block dark:border-transparent relative z-10 mx-4 w-52 max-h-full pb-44'}>
-                        {/* 图标Logo */}
-                        <div className='hidden md:block w-full top-0 left-5 md:left-4 z-40 pt-3 md:pt-4'>
-                            <LogoBar {...props} />
-                        </div>
-                        <div className='main-menu z-20 pl-9 pr-7 pb-5 sticky pt-1 top-20 overflow-y-scroll h-fit max-h-full scroll-hidden bg-white dark:bg-neutral-800 rounded-xl '>
+
+                        <div className='mt-20 main-menu z-20 pl-9 pr-7 pb-5 sticky pt-1 top-20 overflow-y-scroll h-fit max-h-full scroll-hidden bg-white dark:bg-neutral-800 rounded-xl '>
                            {/* 嵌入 */}
                             {slotLeft}
 
@@ -190,21 +185,20 @@ const LayoutPostListIndex = props => {
  * @returns
  */
 const LayoutPostList = props => {
-  return <LayoutBase {...props}></LayoutBase>
-  // const { posts } = props
-  // // 顶部如果是按照分类或标签查看文章列表，列表顶部嵌入一个横幅
-  // // 如果是搜索，则列表顶部嵌入 搜索框
-  // return (
-  //   <LayoutBase {...props} >
-  //       <div className='w-full max-w-7xl mx-auto justify-center mt-8'>
-  //           <div id='posts-wrapper' class='card-list grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'>
-  //               {posts?.map(post => (
-  //                   <BlogPostCard key={post.id} post = {post} className='card' />
-  //               ))}
-  //           </div>
-  //       </div>
-  //   </LayoutBase>
-  // )
+  const { posts } = props
+  // 顶部如果是按照分类或标签查看文章列表，列表顶部嵌入一个横幅
+  // 如果是搜索，则列表顶部嵌入 搜索框
+  return (
+    <LayoutBase {...props} >
+        <div className='w-full max-w-7xl mx-auto justify-center mt-8'>
+            <div id='posts-wrapper' class='card-list grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'>
+                {posts?.map(post => (
+                    <BlogPostCard key={post.id} post = {post} className='card' />
+                ))}
+            </div>
+        </div>
+    </LayoutBase>
+  )
 }
 
 /**
@@ -214,45 +208,44 @@ const LayoutPostList = props => {
  */
 const LayoutSlug = (props) => {
   const { post, lock, validPassword } = props
-  if(post?.slug?.startsWith('http') || post?.slug == '' || post?.slug == null){
-    return <LayoutBase {...props}></LayoutBase>
-  }else{
-    return  <LayoutBase {...props} >
-              {/* 文章锁 */}
-              {lock && <ArticleLock validPassword={validPassword} />}
 
-              {!lock && <div id='container'>
+  return (
+        <LayoutBase {...props} >
+            {/* 文章锁 */}
+            {lock && <ArticleLock validPassword={validPassword} />}
 
-                  {/* title */}
-                  <h1 className="text-3xl pt-4 md:pt-12  dark:text-gray-300">{post?.title}</h1>
+            {!lock && <div id='container'>
 
-                  {/* Notion文章主体 */}
-                  {post && (<section id="article-wrapper" className="px-1">
-                      <NotionPage post={post} />
+                {/* title */}
+                <h1 className="text-3xl pt-4 md:pt-12  dark:text-gray-300">{post?.title}</h1>
 
-                      {/* 分享 */}
-                      {/* <ShareBar post={post} /> */}
-                      {/* 文章分类和标签信息 */}
-                      <div className='flex justify-between'>
-                          {CONFIG.POST_DETAIL_CATEGORY && post?.category && <CategoryItem category={post.category} />}
-                          <div>
-                              {CONFIG.POST_DETAIL_TAG && post?.tagItems?.map(tag => <TagItemMini key={tag.name} tag={tag} />)}
-                          </div>
-                      </div>
+                {/* Notion文章主体 */}
+                {post && (<section id="article-wrapper" className="px-1">
+                    <NotionPage post={post} />
 
-                      {/* 上一篇、下一篇文章 */}
-                      {/* {post?.type === 'Post' && <ArticleAround prev={prev} next={next} />} */}
+                    {/* 分享 */}
+                    {/* <ShareBar post={post} /> */}
+                    {/* 文章分类和标签信息 */}
+                    <div className='flex justify-between'>
+                        {CONFIG.POST_DETAIL_CATEGORY && post?.category && <CategoryItem category={post.category} />}
+                        <div>
+                            {CONFIG.POST_DETAIL_TAG && post?.tagItems?.map(tag => <TagItemMini key={tag.name} tag={tag} />)}
+                        </div>
+                    </div>
 
-                      <AdSlot />
-                      <WWAds className='w-full' orientation='horizontal'/>
+                    {/* 上一篇、下一篇文章 */}
+                    {/* {post?.type === 'Post' && <ArticleAround prev={prev} next={next} />} */}
 
-                      <Comment frontMatter={post} />
-                  </section>)}
+                    <AdSlot />
+                    <WWAds className='w-full' orientation='horizontal'/>
 
-                  <TocDrawer {...props} />
-              </div>}
-          </LayoutBase>
-  }
+                    <Comment frontMatter={post} />
+                </section>)}
+
+                <TocDrawer {...props} />
+            </div>}
+        </LayoutBase>
+  )
 }
 
 /**
@@ -272,14 +265,13 @@ const LayoutSearch = (props) => {
  * @returns
  */
 const LayoutArchive = (props) => {
-  return <LayoutBase {...props}></LayoutBase>
-  // const { archivePosts } = props
+  const { archivePosts } = props
 
-  // return <LayoutBase {...props}>
-  //       <div className="mb-10 pb-20 md:py-12 py-3  min-h-full">
-  //           {Object.keys(archivePosts)?.map(archiveTitle => <BlogArchiveItem key={archiveTitle} archiveTitle={archiveTitle} archivePosts={archivePosts} />)}
-  //       </div>
-  // </LayoutBase>
+  return <LayoutBase {...props}>
+        <div className="mb-10 pb-20 md:py-12 py-3  min-h-full">
+            {Object.keys(archivePosts)?.map(archiveTitle => <BlogArchiveItem key={archiveTitle} archiveTitle={archiveTitle} archivePosts={archivePosts} />)}
+        </div>
+  </LayoutBase>
 }
 
 /**
@@ -295,59 +287,57 @@ const Layout404 = props => {
  * 分类列表
  */
 const LayoutCategoryIndex = (props) => {
-  return <LayoutBase {...props}></LayoutBase>
-  // const { categoryOptions } = props
-  // const { locale } = useGlobal()
-  // return <LayoutBase {...props}>
-  //    <div className='bg-white dark:bg-gray-700 py-10'>
-  //               <div className='dark:text-gray-200 mb-5'>
-  //                   <i className='mr-4 fas fa-th' />{locale.COMMON.CATEGORY}:
-  //               </div>
-  //               <div id='category-list' className='duration-200 flex flex-wrap'>
-  //                   {categoryOptions?.map(category => {
-  //                     return (
-  //                           <Link
-  //                               key={category.name}
-  //                               href={`/category/${category.name}`}
-  //                               passHref
-  //                               legacyBehavior>
-  //                               <div
-  //                                   className={'hover:text-black dark:hover:text-white dark:text-gray-300 dark:hover:bg-gray-600 px-5 cursor-pointer py-2 hover:bg-gray-100'}>
-  //                                   <i className='mr-4 fas fa-folder' />{category.name}({category.count})
-  //                               </div>
-  //                           </Link>
-  //                     )
-  //                   })}
-  //               </div>
-  //           </div>
-  // </LayoutBase>
+  const { categoryOptions } = props
+  const { locale } = useGlobal()
+  return <LayoutBase {...props}>
+     <div className='bg-white dark:bg-gray-700 py-10'>
+                <div className='dark:text-gray-200 mb-5'>
+                    <i className='mr-4 fas fa-th' />{locale.COMMON.CATEGORY}:
+                </div>
+                <div id='category-list' className='duration-200 flex flex-wrap'>
+                    {categoryOptions?.map(category => {
+                      return (
+                            <Link
+                                key={category.name}
+                                href={`/category/${category.name}`}
+                                passHref
+                                legacyBehavior>
+                                <div
+                                    className={'hover:text-black dark:hover:text-white dark:text-gray-300 dark:hover:bg-gray-600 px-5 cursor-pointer py-2 hover:bg-gray-100'}>
+                                    <i className='mr-4 fas fa-folder' />{category.name}({category.count})
+                                </div>
+                            </Link>
+                      )
+                    })}
+                </div>
+            </div>
+  </LayoutBase>
 }
 
 /**
  * 标签列表
  */
 const LayoutTagIndex = (props) => {
-  return <LayoutBase {...props}></LayoutBase>
-  // const { tagOptions } = props
-  // const { locale } = useGlobal()
+  const { tagOptions } = props
+  const { locale } = useGlobal()
 
-  // return <LayoutBase {...props}>
-  //    <div className="bg-white dark:bg-gray-700 py-10">
-  //               <div className="dark:text-gray-200 mb-5">
-  //                   <i className="mr-4 fas fa-tag" />
-  //                   {locale.COMMON.TAGS}:
-  //               </div>
-  //               <div id="tags-list" className="duration-200 flex flex-wrap">
-  //                   {tagOptions?.map(tag => {
-  //                     return (
-  //                           <div key={tag.name} className="p-2">
-  //                               <TagItemMini key={tag.name} tag={tag} />
-  //                           </div>
-  //                     )
-  //                   })}
-  //               </div>
-  //           </div>
-  // </LayoutBase>
+  return <LayoutBase {...props}>
+     <div className="bg-white dark:bg-gray-700 py-10">
+                <div className="dark:text-gray-200 mb-5">
+                    <i className="mr-4 fas fa-tag" />
+                    {locale.COMMON.TAGS}:
+                </div>
+                <div id="tags-list" className="duration-200 flex flex-wrap">
+                    {tagOptions?.map(tag => {
+                      return (
+                            <div key={tag.name} className="p-2">
+                                <TagItemMini key={tag.name} tag={tag} />
+                            </div>
+                      )
+                    })}
+                </div>
+            </div>
+  </LayoutBase>
 }
 
 export {
