@@ -17,6 +17,7 @@ import { getQueryParam } from '../lib/utils'
 // 各种扩展插件 这个要阻塞引入
 import ExternalPlugins from '@/components/ExternalPlugins'
 import { THEME } from '@/blog.config'
+import GlobalHead from '@/components/GlobalHead'
 
 const MyApp = ({ Component, pageProps }) => {
   /**
@@ -29,6 +30,7 @@ const MyApp = ({ Component, pageProps }) => {
     return getQueryParam(route.asPath, 'theme') || THEME
   }, [route])
 
+  // 整体布局
   const GLayout = useCallback(
     props => {
       // 根据页面路径加载不同Layout文件
@@ -41,6 +43,7 @@ const MyApp = ({ Component, pageProps }) => {
   return (
     <GlobalContextProvider {...pageProps}>
       <GLayout {...pageProps}>
+        <GlobalHead {...pageProps}/>
         <Component {...pageProps} />
       </GLayout>
       <ExternalPlugins {...pageProps} />
