@@ -16,9 +16,15 @@ import { getQueryParam } from '../lib/utils'
 
 // 各种扩展插件 这个要阻塞引入
 import ExternalPlugins from '@/components/ExternalPlugins'
-import { THEME } from '@/blog.config'
 import GlobalHead from '@/components/GlobalHead'
+import { siteConfig } from '@/lib/config'
+import BLOG from '@/blog.config'
 
+/**
+ * App挂载DOM 入口文件
+ * @param {*} param0
+ * @returns
+ */
 const MyApp = ({ Component, pageProps }) => {
   /**
    * 首页布局
@@ -27,7 +33,7 @@ const MyApp = ({ Component, pageProps }) => {
    */
   const route = useRouter()
   const queryParam = useMemo(() => {
-    return getQueryParam(route.asPath, 'theme') || THEME
+    return getQueryParam(route.asPath, 'theme') || siteConfig('THEME', BLOG.THEME, pageProps.NOTION_CONFIG)
   }, [route])
 
   // 整体布局
