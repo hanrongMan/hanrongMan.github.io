@@ -52,6 +52,12 @@ const MyApp = ({ Component, pageProps }) => {
   )
 
   const enableClerk = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+  // 判断是否为 /about 页面
+  if (route.pathname === '/about') {
+    return <Component {...pageProps} />
+  }
+
   const content = (
     <GlobalContextProvider {...pageProps}>
       <GLayout {...pageProps}>
